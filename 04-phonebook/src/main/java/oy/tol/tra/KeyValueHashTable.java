@@ -1,10 +1,11 @@
 package oy.tol.tra;
 
+
 public class KeyValueHashTable<K extends Comparable<K>, V> implements Dictionary<K, V> {
 
     // This should implement a hash table.
 
-    private Pair<K, V>[] values = null;
+    private Pair<K, V>[] entries = null;
     private int count = 0;
     private int collisionCount = 0;
     private int maxProbingSteps = 0;
@@ -22,7 +23,7 @@ public class KeyValueHashTable<K extends Comparable<K>, V> implements Dictionary
 
     @Override
     public Type getType() {
-        return Type.NONE;
+        return Type.HASHTABLE;
     }
 
     @SuppressWarnings("unchecked")
@@ -32,7 +33,7 @@ public class KeyValueHashTable<K extends Comparable<K>, V> implements Dictionary
             capacity = DEFAULT_CAPACITY;
         }
         // Assuming capacity means the count of elements to add, so multiplying by fill factor.
-        values = (Pair<K, V>[]) new Pair[(int) ((double) capacity * (1.0 + LOAD_FACTOR))];
+        entries = (Pair<K, V>[]) new Pair[(int) ((double) capacity * (1.0 + LOAD_FACTOR))];
         reallocationCount = 0;
         count = 0;
         collisionCount = 0;
@@ -41,8 +42,7 @@ public class KeyValueHashTable<K extends Comparable<K>, V> implements Dictionary
 
     @Override
     public int size() {
-        // TODO: Implement this.
-        return 0;
+        return count;
     }
 
     /**
@@ -60,8 +60,8 @@ public class KeyValueHashTable<K extends Comparable<K>, V> implements Dictionary
     public String getStatus() {
         StringBuilder builder = new StringBuilder();
         builder.append(String.format("Hash table load factor is %.2f%n", LOAD_FACTOR));
-        builder.append(String.format("Hash table capacity is %d%n", values.length));
-        builder.append(String.format("Current fill rate is %.2f%%%n", (count / (double)values.length) * 100.0));
+        builder.append(String.format("Hash table capacity is %d%n", entries.length));
+        builder.append(String.format("Current fill rate is %.2f%%%n", (count / (double)entries.length) * 100.0));
         builder.append(String.format("Hash table had %d collisions when filling the hash table.%n", collisionCount));
         builder.append(String.format("Hash table had to probe %d times in the worst case.%n", maxProbingSteps));
         builder.append(String.format("Hash table had to reallocate %d times.%n", reallocationCount));
@@ -70,59 +70,131 @@ public class KeyValueHashTable<K extends Comparable<K>, V> implements Dictionary
 
     @Override
     public boolean add(K key, V value) throws IllegalArgumentException, OutOfMemoryError {
-        // TODO: Implement this.
-        // Remeber to check for null values.
-
-        // Checks if the LOAD_FACTOR has been exceeded --> if so, reallocates to a bigger hashtable.
-        if (((double)count * (1.0 + LOAD_FACTOR)) >= values.length) {
-            reallocate((int)((double)(values.length) * (1.0 / LOAD_FACTOR)));
+        if (key == null) throw new IllegalArgumentException("Key cannot be null.");
+        int index = key.hashCode() % entries.length;
+        int originalIndex = index;
+        boolean isNewAddition = false;
+        int steps = 0;
+        while (entries[index] != null && !entries[index].getKey().equals(key)) {
+            index = (index + 1) % entries.length;
+            steps++;
+            if (index == originalIndex) {
+                throw new OutOfMemoryError("Hash table is full.");
+            }
         }
-        // Remember to get the hash key from the Person,
-        // hash table computes the index for the Person (based on the hash value),
-        // if index was taken by different Person (collision), get new hash and index,
-        // insert into table when the index has a null in it,
-        // return true if existing Person updated or new Person inserted.
-        
-        return false;
+
+        if (entries[index] == null) {
+            count++;
+            isNewAddition = true;
+        }
+
+        entries[index] = new Pair<>(key, value);
+        maxProbingSteps = Math.max(maxProbingSteps, steps);
+
+        if (steps > 0) collisionCount++;
+
+        if (((double) count / entries.length) > LOAD_FACTOR) {
+            reallocate((int) (entries.length * (1.0 / LOAD_FACTOR)));
+        }
+
+        return isNewAddition;
     }
 
     @Override
     public V find(K key) throws IllegalArgumentException {
-        // Remember to check for null.
+        if (key == null) throw new IllegalArgumentException("Key cannot be null.");
 
-        // Must use same method for computing index as add method
-        
-        return null;
+        int index = key.hashCode() % entries.length;
+        int originalIndex = index;
+
+        while (entries[index] != null && !entries[index].getKey().equals(key)) {
+            index = (index + 1) % entries.length;
+            if (index == originalIndex) {
+                return null;
+            }
+        }
+
+        return entries[index] != null ? entries[index].getValue() : null;
     }
 
-    @Override
+/*    @Override
     @java.lang.SuppressWarnings({"unchecked"})
-    public Pair<K,V> [] toSortedArray() {
-        Pair<K, V> [] sorted = (Pair<K,V>[])new Pair[count];
+    public Pair<K,V>[] toSortedArray() {
+        Pair<K, V>[] sorted = (Pair<K,V>[])new Pair[count];
         int newIndex = 0;
-        for (int index = 0; index < values.length; index++) {
-           if (values[index] != null) {
-              sorted[newIndex++] = new Pair<>(values[index].getKey(), values[index].getValue());
-           }
+        for (int index = 0; index < entries.length; index++) {
+            if (entries[index] != null) {
+                sorted[newIndex++] = new Pair<>(entries[index].getKey(), entries[index].getValue());
+            }
         }
         Algorithms.fastSort(sorted);
         return sorted;
-      }
+    }*/
+
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public Pair<K, V>[] toSortedArray() {
+        Pair<K, V>[] pairs = (Pair<K, V>[]) new Pair[count]; // Create an array to hold key-value pairs
+        int index = 0;
+        for (Pair<K, V> entry : entries) {
+            if (entry != null) {
+                pairs[index++] = entry; // Add non-null entries to the array
+            }
+        }
+        // Sort the array using a sorting algorithm (e.g., quicksort)
+        quickSort(pairs, 0, count - 1);
+        return pairs;
+    }
+
+    // Quicksort implementation
+    private void quickSort(Pair<K, V>[] arr, int low, int high) {
+        if (low < high) {
+            int pi = partition(arr, low, high);
+            quickSort(arr, low, pi - 1);
+            quickSort(arr, pi + 1, high);
+        }
+    }
+
+    private int partition(Pair<K, V>[] arr, int low, int high) {
+        Pair<K, V> pivot = arr[high];
+        int i = low - 1;
+        for (int j = low; j < high; j++) {
+            if (arr[j].getKey().compareTo(pivot.getKey()) <= 0) {
+                i++;
+                Pair<K, V> temp = arr[i];
+                arr[i] = arr[j];
+                arr[j] = temp;
+            }
+        }
+        Pair<K, V> temp = arr[i + 1];
+        arr[i + 1] = arr[high];
+        arr[high] = temp;
+        return i + 1;
+    }
+
+
+
+
+
+
+
+
 
     @SuppressWarnings("unchecked")
     private void reallocate(int newSize) throws OutOfMemoryError {
         if (newSize < DEFAULT_CAPACITY) {
-            newSize = DEFAULT_CAPACITY;
+            newSize =        DEFAULT_CAPACITY;
         }
         reallocationCount++;
-        Pair<K, V>[] oldPairs = values;
-        this.values = (Pair<K, V>[]) new Pair[(int)((double)newSize * (1.0 + LOAD_FACTOR))];
+        Pair<K, V>[] oldEntries = entries;
+        this.entries = (Pair<K, V>[]) new Pair[(int)((double)newSize * (1.0 + LOAD_FACTOR))];
         count = 0;
         collisionCount = 0;
         maxProbingSteps = 0;
-        for (int index = 0; index < oldPairs.length; index++) {
-            if (oldPairs[index] != null) {
-                add(oldPairs[index].getKey(), oldPairs[index].getValue());
+        for (int index = 0; index < oldEntries.length; index++) {
+            if (oldEntries[index] != null) {
+                add(oldEntries[index].getKey(), oldEntries[index].getValue());
             }
         }
     }
@@ -130,9 +202,18 @@ public class KeyValueHashTable<K extends Comparable<K>, V> implements Dictionary
     @Override
     public void compress() throws OutOfMemoryError {
         int newCapacity = (int)(count * (1.0 / LOAD_FACTOR));
-		    if (newCapacity < values.length) {
-			      reallocate(newCapacity);
-		    } 
+        if (newCapacity < entries.length) {
+            reallocate(newCapacity);
+        }
     }
- 
+
+
+
+
+
+
+
+
+
 }
+

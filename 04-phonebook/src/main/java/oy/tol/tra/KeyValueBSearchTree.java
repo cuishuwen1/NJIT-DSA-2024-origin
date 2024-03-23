@@ -5,20 +5,20 @@ public class KeyValueBSearchTree<K extends Comparable<K>, V> implements Dictiona
     // This is the BST implementation, KeyValueHashTable has the hash table
     // implementation
 
-    private TreeNode<K, V> root;
-    private int count = 0;
-    private int maxTreeDepth = 0;
+    private TreeNode<K, V> rootNode;
+    private int elementCount = 0;
+    private int maxDepth = 0;
 
     @Override
     public Type getType() {
-        return Type.NONE;
+        return Type.BST;
     }
 
     @Override
     public int size() {
-        // TODO: Implement this
-        return 0;
+        return elementCount;
     }
+
 
     /**
      * Prints out the statistics of the tree structure usage.
@@ -36,33 +36,47 @@ public class KeyValueBSearchTree<K extends Comparable<K>, V> implements Dictiona
      */
     @Override
     public String getStatus() {
-        String toReturn = "Tree has max depth of " + maxTreeDepth + ".\n";
-        toReturn += "Longest collision chain in a tree node is " + TreeNode.longestCollisionChain + "\n";
+        String statusMessage = "Tree has max depth of " + maxDepth + ".\n";
+        statusMessage += "Longest collision chain in a tree node is " + TreeNode.longestCollisionChain + "\n";
         TreeAnalyzerVisitor<K, V> visitor = new TreeAnalyzerVisitor<>();
-        root.accept(visitor);
-        toReturn += "Min path height to bottom: " + visitor.minHeight + "\n";
-        toReturn += "Max path height to bottom: " + visitor.maxHeight + "\n";
-        toReturn += "Ideal height if balanced: " + Math.ceil(Math.log(count)) + "\n";
-        return toReturn;
+        rootNode.accept(visitor);
+        statusMessage += "Min path height to bottom: " + visitor.minHeight + "\n";
+        statusMessage += "Max path height to bottom: " + visitor.maxHeight + "\n";
+        statusMessage += "Ideal height if balanced: " + Math.ceil(Math.log(elementCount)) + "\n";
+        return statusMessage;
     }
 
     @Override
     public boolean add(K key, V value) throws IllegalArgumentException, OutOfMemoryError {
-        // TODO: Implement this
-        // Remember null check.
-        // If root is null, should go there.
-        
-            // update the root node. But it may have children
-            // so do not just replace it with this new node but set
-            // the keys and values for the already existing root.
-            
-        return false;
+        if (key == null || value == null) {
+            throw new IllegalArgumentException("Neither key nor value can be null.");
+        }
+        if (rootNode == null) {
+            rootNode = new TreeNode<>(key, value);
+            elementCount++;
+            maxDepth = 1; // Just added the root, so depth is 1
+            return true;
+        } else {
+            int depthBefore = TreeNode.currentAddTreeDepth;
+            int added = rootNode.insert(key, value, key.hashCode());
+            int depthAfter = TreeNode.currentAddTreeDepth;
+            TreeNode.currentAddTreeDepth = 0; // Reset for next addition
+            if (added > 0) {
+                elementCount++; // Increase count if new node was added
+            }
+            if (depthAfter > maxDepth) {
+                maxDepth = depthAfter; // Update max depth if it increased
+            }
+            return added > 0;
+        }
     }
 
     @Override
     public V find(K key) throws IllegalArgumentException {
-        // TODO: Implement this. //Think about this
-        return (null);
+        if (key == null) {
+            throw new IllegalArgumentException("Key cannot be null.");
+        }
+        return (rootNode != null) ? rootNode.find(key, key.hashCode()) : null;
     }
 
     @Override
@@ -72,11 +86,11 @@ public class KeyValueBSearchTree<K extends Comparable<K>, V> implements Dictiona
 
     @Override
     public Pair<K, V>[] toSortedArray() {
-        TreeToArrayVisitor<K, V> visitor = new TreeToArrayVisitor<>(count);
-        root.accept(visitor);
-        Pair<K, V>[] sorted = visitor.getArray();
-        Algorithms.fastSort(sorted);
-        return sorted;
+        TreeToArrayVisitor<K, V> visitor = new TreeToArrayVisitor<>(elementCount);
+        rootNode.accept(visitor);
+        Pair<K, V>[] sortedArray = visitor.getArray();
+        Algorithms.fastSort(sortedArray);
+        return sortedArray;
     }
 
     @Override
@@ -84,5 +98,17 @@ public class KeyValueBSearchTree<K extends Comparable<K>, V> implements Dictiona
         // Nothing to do here, since BST does not use extra space like array based
         // structures.
     }
+
+
+
+
+
+
+
+
+
+
+
+
 
 }

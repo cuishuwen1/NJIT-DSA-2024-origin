@@ -23,7 +23,7 @@ public class StackImplementation<E> implements StackInterface<E> {
     * @throws StackAllocationException
     */
    public StackImplementation() throws StackAllocationException {
-      this(DEFAULT_STACK_SIZE); // calling the constructor with size parameter with default size of 10
+      this(DEFAULT_STACK_SIZE);
    }
 
    /** TODO: Implement so that
@@ -56,7 +56,7 @@ public class StackImplementation<E> implements StackInterface<E> {
          throw new NullPointerException("Element cannot be null");
       }
       if (currentIndex == capacity - 1) {
-         // If the array is full, resize it
+
          int newCapacity = capacity * 2;
          Object[] newArray = new Object[newCapacity];
          System.arraycopy(itemArray, 0, newArray, 0, capacity);

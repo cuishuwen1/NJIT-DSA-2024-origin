@@ -9,7 +9,7 @@ package oy.tol.tra;
 public class SearchArray {
 
     private SearchArray() {
-        // Empty
+
     }
 
     /**
@@ -36,10 +36,10 @@ public class SearchArray {
             } else if (cmp > 0) {
                 high = mid - 1;
             } else {
-                return mid; // key found
+                return mid;
             }
         }
-        return -1; // key not found
+        return -1;
     }
 
     /**

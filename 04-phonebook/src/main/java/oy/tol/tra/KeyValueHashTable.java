@@ -3,7 +3,7 @@ package oy.tol.tra;
 
 public class KeyValueHashTable<K extends Comparable<K>, V> implements Dictionary<K, V> {
 
-    // This should implement a hash table.
+
 
     private Pair<K, V>[] entries = null;
     private int count = 0;
@@ -117,37 +117,24 @@ public class KeyValueHashTable<K extends Comparable<K>, V> implements Dictionary
         return entries[index] != null ? entries[index].getValue() : null;
     }
 
-/*    @Override
-    @java.lang.SuppressWarnings({"unchecked"})
-    public Pair<K,V>[] toSortedArray() {
-        Pair<K, V>[] sorted = (Pair<K,V>[])new Pair[count];
-        int newIndex = 0;
-        for (int index = 0; index < entries.length; index++) {
-            if (entries[index] != null) {
-                sorted[newIndex++] = new Pair<>(entries[index].getKey(), entries[index].getValue());
-            }
-        }
-        Algorithms.fastSort(sorted);
-        return sorted;
-    }*/
 
 
     @SuppressWarnings("unchecked")
     @Override
     public Pair<K, V>[] toSortedArray() {
-        Pair<K, V>[] pairs = (Pair<K, V>[]) new Pair[count]; // Create an array to hold key-value pairs
+        Pair<K, V>[] pairs = (Pair<K, V>[]) new Pair[count];
         int index = 0;
         for (Pair<K, V> entry : entries) {
             if (entry != null) {
-                pairs[index++] = entry; // Add non-null entries to the array
+                pairs[index++] = entry;
             }
         }
-        // Sort the array using a sorting algorithm (e.g., quicksort)
+
         quickSort(pairs, 0, count - 1);
         return pairs;
     }
 
-    // Quicksort implementation
+
     private void quickSort(Pair<K, V>[] arr, int low, int high) {
         if (low < high) {
             int pi = partition(arr, low, high);

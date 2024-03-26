@@ -57,7 +57,7 @@ public class KeyValueBSearchTree<K extends Comparable<K>, V> implements Dictiona
             maxDepth = 1; // Just added the root, so depth is 1
             return true;
         } else {
-            int depthBefore = TreeNode.currentAddTreeDepth;
+//            int depthBefore = TreeNode.currentAddTreeDepth;
             int added = rootNode.insert(key, value, key.hashCode());
             int depthAfter = TreeNode.currentAddTreeDepth;
             TreeNode.currentAddTreeDepth = 0; // Reset for next addition

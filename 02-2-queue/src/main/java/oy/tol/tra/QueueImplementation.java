@@ -11,7 +11,6 @@ public class QueueImplementation<E> implements QueueInterface<E> {
     /**
      * Allocates a queue with a default capacity.
      *
-     * @throws QueueAllocationException
      */
     public QueueImplementation() throws QueueAllocationException {
         capacity = DEFAULT_CAPACITY;
@@ -20,7 +19,7 @@ public class QueueImplementation<E> implements QueueInterface<E> {
 
     /**
      * @param capacity The capacity of the queue.
-     * @throws QueueAllocationException If cannot allocate room for the internal array.
+     * @throws QueueAllocationException If you cannot allocate room for the internal array.
      */
     public QueueImplementation(int capacity) throws QueueAllocationException {
         if (capacity < 2) {
@@ -37,6 +36,9 @@ public class QueueImplementation<E> implements QueueInterface<E> {
 
     @Override
     public void enqueue(E element) throws QueueAllocationException, NullPointerException {
+        if (element == null) {
+            throw new NullPointerException("Cannot enqueue null element.");
+        }
         if (size == capacity) {
             Object[] newArray = new Object[this.capacity * 2 + 1];
             int sourceIndex = headIndex;
@@ -51,9 +53,7 @@ public class QueueImplementation<E> implements QueueInterface<E> {
             elements = newArray;
             capacity = capacity * 2 + 1;
         }
-        if (element == null) {
-            throw new NullPointerException();
-        }
+
         tailIndex = (tailIndex + 1) % capacity;
         elements[tailIndex] = element;
         size++;
@@ -61,7 +61,11 @@ public class QueueImplementation<E> implements QueueInterface<E> {
 
     @Override
     public E dequeue() throws QueueIsEmptyException {
+        if (isEmpty()) {
+            throw new QueueIsEmptyException("Queue is empty");
+        }
         E element = element();
+        elements[headIndex] = null;
         headIndex = (headIndex + 1) % capacity;
         size--;
         return element;
@@ -88,6 +92,9 @@ public class QueueImplementation<E> implements QueueInterface<E> {
 
     @Override
     public void clear() {
+        for (int i = 0; i < capacity; i++) {
+            elements[i] = null;
+        }
         headIndex = 0;
         tailIndex = -1;
         size = 0;

@@ -1,77 +1,68 @@
 package oy.tol.tra;
 
 public class Algorithms {
-    public static <T>void exchange(T[] arr, int idx1, int idx2){
-        T tmp = arr[idx1];
-        arr[idx1] = arr[idx2];
-        arr[idx2] = tmp;
-    }
 
-    public static <T extends Comparable<T>> void sort(T[] arr){
-        for (int i = 0; i < arr.length - 1; i++) {
-            for (int j = 0; j < arr.length - i - 1; j++) {
-                if (arr[j].compareTo(arr[j + 1]) > 0) {
-                    exchange(arr, j, j + 1);
-                }
-            }
-        }
-    }
 
-    public static <T> void reverse(T[] arr){
+    public static <T> void reverse(T[] array) {
         int left = 0;
-        int right = arr.length - 1;
+        int right = array.length - 1;
         while (left < right) {
-            exchange(arr, left, right);
+            swap(array, left, right);
             left++;
             right--;
         }
     }
 
-    public static <T extends Comparable<T>> int binarySearch(T value, T[] arr, int fromIdx, int toIdx) {
-        int mid;
-        while (fromIdx <= toIdx) {
-            mid = fromIdx + (toIdx - fromIdx) / 2;
-            if (value.compareTo(arr[mid]) > 0) {
-                fromIdx = mid + 1;
-            } else if (value.compareTo(arr[mid]) < 0) {
-                toIdx = mid - 1;
-            } else {
-                return mid;
-            }
-        }
-        return -1;
+
+    private static <T> void swap(T[] array, int i, int j) {
+        T temp = array[i];
+        array[i] = array[j];
+        array[j] = temp;
     }
 
-    public static <E extends Comparable<E>> void quickSort(E[] arr) {
-        quickSortRec(arr, 0, arr.length - 1);
-    }
 
-    public static <E extends Comparable<E>> void quickSortRec(E[] arr, int begin, int end) {
-        if (begin >= end) {
+    public static <T extends Comparable<T>> void sort(T[] array) {
+        if (array == null || array.length <= 1) {
             return;
         }
-        int pivot = partition(arr, begin, end);
-        quickSortRec(arr, begin, pivot - 1);
-        quickSortRec(arr, pivot + 1, end);
+        quickSort(array, 0, array.length - 1);
     }
 
-    private static <E extends Comparable<E>> int partition(E[] arr, int begin, int end) {
-        E pivot = arr[begin];
-        int left = begin;
-        int right = end;
-        while (left != right) {
-            while ((left < right) && arr[right].compareTo(pivot) > 0) {
-                right--;
-            }
-            while ((left < right) && arr[left].compareTo(pivot) <= 0) {
-                left++;
-            }
-            if (left < right) {
-                exchange(arr, left, right);
+    private static <T extends Comparable<T>> void quickSort(T[] array, int begin, int end) {
+        if (begin < end) {
+            int pivotIndex = partition(array, begin, end);
+            quickSort(array, begin, pivotIndex - 1);
+            quickSort(array, pivotIndex + 1, end);
+        }
+    }
+
+    private static <T extends Comparable<T>> int partition(T[] array, int begin, int end) {
+        T pivot = array[end];
+        int i = begin - 1;
+        for (int j = begin; j < end; j++) {
+            if (array[j].compareTo(pivot) <= 0) {
+                i++;
+                swap(array, i, j);
             }
         }
-        arr[begin] = arr[left];
-        arr[left] = pivot;
-        return left;
+        swap(array, i + 1, end);
+        return i + 1;
+    }
+
+
+    public static <T extends Comparable<T>> int binarySearch(T value, T[] array, int fromIndex, int toIndex) {
+        if (fromIndex > toIndex) {
+            return -1;
+        }
+
+        int mid = (fromIndex + toIndex) / 2;
+
+        if (value.compareTo(array[mid]) == 0) {
+            return mid;
+        } else if (value.compareTo(array[mid]) < 0) {
+            return binarySearch(value, array, fromIndex, mid - 1);
+        } else {
+            return binarySearch(value, array, mid + 1, toIndex);
+        }
     }
 }

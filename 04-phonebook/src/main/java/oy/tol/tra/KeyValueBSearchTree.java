@@ -2,8 +2,7 @@ package oy.tol.tra;
 
 public class KeyValueBSearchTree<K extends Comparable<K>, V> implements Dictionary<K, V> {
 
-    // This is the BST implementation, KeyValueHashTable has the hash table
-    // implementation
+
 
     private TreeNode<K, V> rootNode;
     private int elementCount = 0;
@@ -54,18 +53,18 @@ public class KeyValueBSearchTree<K extends Comparable<K>, V> implements Dictiona
         if (rootNode == null) {
             rootNode = new TreeNode<>(key, value);
             elementCount++;
-            maxDepth = 1; // Just added the root, so depth is 1
+            maxDepth = 1;
             return true;
         } else {
 //            int depthBefore = TreeNode.currentAddTreeDepth;
             int added = rootNode.insert(key, value, key.hashCode());
             int depthAfter = TreeNode.currentAddTreeDepth;
-            TreeNode.currentAddTreeDepth = 0; // Reset for next addition
+            TreeNode.currentAddTreeDepth = 0;
             if (added > 0) {
-                elementCount++; // Increase count if new node was added
+                elementCount++;
             }
             if (depthAfter > maxDepth) {
-                maxDepth = depthAfter; // Update max depth if it increased
+                maxDepth = depthAfter;
             }
             return added > 0;
         }
@@ -81,7 +80,7 @@ public class KeyValueBSearchTree<K extends Comparable<K>, V> implements Dictiona
 
     @Override
     public void ensureCapacity(int size) throws OutOfMemoryError {
-        // Nothing to do here. Trees need no capacity.
+
     }
 
     @Override
@@ -95,8 +94,7 @@ public class KeyValueBSearchTree<K extends Comparable<K>, V> implements Dictiona
 
     @Override
     public void compress() throws OutOfMemoryError {
-        // Nothing to do here, since BST does not use extra space like array based
-        // structures.
+
     }
 
 

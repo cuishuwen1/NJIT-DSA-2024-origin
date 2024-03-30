@@ -28,6 +28,10 @@ public class Algorithms {
         quickSort(array, 0, array.length - 1);
     }
 
+    public static <E extends Comparable<E>> void fastSort(E[] array) {
+        quickSort(array, 0, array.length - 1);
+    }
+
     private static <T extends Comparable<T>> void quickSort(T[] array, int begin, int end) {
         if (begin < end) {
             int pivotIndex = partition(array, begin, end);

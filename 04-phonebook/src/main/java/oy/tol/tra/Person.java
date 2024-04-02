@@ -61,10 +61,12 @@ public class Person implements Comparable<Person> {
      */
     @Override
     public int hashCode() {
-        int hash = 5381;
-        hash = (hash << 5) + hash ^ (firstName != null ? firstName.hashCode() : 0);
-        hash = (hash << 5) + hash ^ (lastName != null ? lastName.hashCode() : 0);
-        return hash & 0x7fffffff;
+        int hash=0;
+        String hashString=firstName+lastName;
+        for (int i = 0; i < hashString.length(); i++) {
+            hash=37*hash+hashString.charAt(i);
+        }
+        return hash;
     }
 
     /**

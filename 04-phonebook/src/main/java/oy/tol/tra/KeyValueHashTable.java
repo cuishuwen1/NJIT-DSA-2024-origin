@@ -102,58 +102,57 @@ public class KeyValueHashTable<K extends Comparable<K>, V> implements Dictionary
 
     @Override
     public V find(K key) throws IllegalArgumentException {
-        if (key == null) throw new IllegalArgumentException("Key cannot be null.");
 
-        int index = key.hashCode() % entries.length;
-        int originalIndex = index;
+        if (null==key) throw new IllegalArgumentException("Person to find cannot be null");
+        // Must use same method for computing index as add method
+        int hashCode = key.hashCode();
+        int index = getIndex(hashCode,key);
+        if (index == -1){
+            return null;
+        }
+        return entries[index].getValue();
+//        if (key == null) throw new IllegalArgumentException("Key cannot be null.");
+//
+//        int index = key.hashCode() % entries.length;
+//        int originalIndex = index;
+//
+//        while (entries[index] != null && !entries[index].getKey().equals(key)) {
+//            index = (index + 1) % entries.length;
+//            if (index == originalIndex) {
+//                return null;
+//            }
+//        }
+//
+//        return entries[index] != null ? entries[index].getValue() : null;
+    }
 
-        while (entries[index] != null && !entries[index].getKey().equals(key)) {
+    private int getIndex(int hashCode,K key){
+        int index = Math.abs(hashCode) % entries.length;
+
+        int start = index;
+        while (entries[index] == null || !entries[index].getKey().equals(key)) {
             index = (index + 1) % entries.length;
-            if (index == originalIndex) {
-                return null;
+            if (index == start) {
+                return -1;
             }
         }
-
-        return entries[index] != null ? entries[index].getValue() : null;
+        return index;
     }
 
 
 
     @SuppressWarnings("unchecked")
     @Override
-    public Pair<K, V>[] toSortedArray() {
-
-        Pair<K, V>[] pairs = (Pair<K, V>[]) new Pair[count];
-        int index = 0;
-        for (Pair<K, V> entry : entries) {
-            if (entry != null) {
-                pairs[index++] = entry;
+    public Pair<K,V> [] toSortedArray() {
+        Pair<K, V> [] sorted = (Pair<K,V>[])new Pair[count];
+        int newIndex = 0;
+        for (int index = 0; index < entries.length; index++) {
+            if (entries[index] != null) {
+                sorted[newIndex++] = new Pair<>(entries[index].getKey(), entries[index].getValue());
             }
         }
-
-
-        K[] keys = (K[]) new Comparable[count];
-        for (int i = 0; i < count; i++) {
-            keys[i] = pairs[i].getKey();
-        }
-
-
-        Algorithms.quickSort(keys, 0, count - 1);
-
-
-        Pair<K, V>[] sortedPairs = (Pair<K, V>[]) new Pair[count];
-        for (int i = 0; i < count; i++) {
-            K key = keys[i];
-            for (Pair<K, V> pair : pairs) {
-                if (pair.getKey().equals(key)) {
-                    sortedPairs[i] = pair;
-                    break;
-                }
-            }
-        }
-
-        return sortedPairs;
-
+        Algorithms.fastSort(sorted);
+        return sorted;
     }
 
 

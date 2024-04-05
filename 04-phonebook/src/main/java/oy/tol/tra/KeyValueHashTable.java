@@ -71,7 +71,7 @@ public class KeyValueHashTable<K extends Comparable<K>, V> implements Dictionary
     @Override
     public boolean add(K key, V value) throws IllegalArgumentException, OutOfMemoryError {
         if (key == null) throw new IllegalArgumentException("Key cannot be null.");
-        int index = key.hashCode() % entries.length;
+        int index = Math.abs(key.hashCode() % entries.length);
         int originalIndex = index;
         boolean isNewAddition = false;
         int steps = 0;
@@ -122,6 +122,7 @@ public class KeyValueHashTable<K extends Comparable<K>, V> implements Dictionary
     @SuppressWarnings("unchecked")
     @Override
     public Pair<K, V>[] toSortedArray() {
+
         Pair<K, V>[] pairs = (Pair<K, V>[]) new Pair[count];
         int index = 0;
         for (Pair<K, V> entry : entries) {
@@ -130,18 +131,32 @@ public class KeyValueHashTable<K extends Comparable<K>, V> implements Dictionary
             }
         }
 
-        quickSort(pairs, 0, count - 1);
-        return pairs;
-    }
 
-
-    private void quickSort(Pair<K, V>[] arr, int low, int high) {
-        if (low < high) {
-            int pi = partition(arr, low, high);
-            quickSort(arr, low, pi - 1);
-            quickSort(arr, pi + 1, high);
+        K[] keys = (K[]) new Comparable[count];
+        for (int i = 0; i < count; i++) {
+            keys[i] = pairs[i].getKey();
         }
+
+
+        Algorithms.quickSort(keys, 0, count - 1);
+
+
+        Pair<K, V>[] sortedPairs = (Pair<K, V>[]) new Pair[count];
+        for (int i = 0; i < count; i++) {
+            K key = keys[i];
+            for (Pair<K, V> pair : pairs) {
+                if (pair.getKey().equals(key)) {
+                    sortedPairs[i] = pair;
+                    break;
+                }
+            }
+        }
+
+        return sortedPairs;
+
     }
+
+
 
     private int partition(Pair<K, V>[] arr, int low, int high) {
         Pair<K, V> pivot = arr[high];
@@ -170,12 +185,10 @@ public class KeyValueHashTable<K extends Comparable<K>, V> implements Dictionary
 
     @SuppressWarnings("unchecked")
     private void reallocate(int newSize) throws OutOfMemoryError {
-        if (newSize < DEFAULT_CAPACITY) {
-            newSize =        DEFAULT_CAPACITY;
-        }
+        newSize = Math.max(DEFAULT_CAPACITY, newSize);
         reallocationCount++;
         Pair<K, V>[] oldEntries = entries;
-        this.entries = (Pair<K, V>[]) new Pair[(int)((double)newSize * (1.0 + LOAD_FACTOR))];
+        this.entries = (Pair<K, V>[]) new Pair[newSize];
         count = 0;
         collisionCount = 0;
         maxProbingSteps = 0;
